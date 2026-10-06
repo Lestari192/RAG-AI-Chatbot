@@ -1,0 +1,238 @@
+{
+  "name": "02 - RAG AI Agent Web Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Aii Kim. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -176,
+        48
+      ],
+      "id": "b3d2ed2d-06b8-474c-bdc1-12ab38e3b2a3",
+      "name": "When chat message received",
+      "webhookId": "64da06c2-c95b-49b7-b157-c6b22caca221"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Anda adalah Asisten Virtual Akademik yang bertugas menjawab pertanyaan terkait Panduan Penulisan Ilmiah Tugas Akhir/Skripsi.\n\nPedoman Jawaban:\n1. Selalu gunakan alat 'penulisan_ilmiah_knowledge_base' untuk mencari informasi mengenai aturan, kriteria, dan struktur Tugas Akhir/Skripsi sebelum memberikan jawaban.\n2. Jawab pertanyaan pengguna berdasarkan informasi dari dokumen panduan tersebut secara rinci, sopan, dan terstruktur.\n3. Jika informasi tidak ditemukan dalam dokumen panduan, sampaikan dengan jujur bahwa informasi tersebut tidak tertera dalam panduan resmi."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        64,
+        48
+      ],
+      "id": "5e58cfac-618d-4c58-a81a-c2f435a2a03f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "description": "Gunakan alat ini untuk mencari informasi relevan mengenai aturan, struktur, dan panduan penulisan ilmiah Tugas Akhir / Skripsi."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        240
+      ],
+      "id": "27413aca-fb74-4de6-8ef2-1232c5c240d4",
+      "name": "Answer questions with a vector store",
+      "notes": "penulisan_ilmiah_knowledge_base"
+    },
+    {
+      "parameters": {
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        384
+      ],
+      "id": "3c0315cb-a888-4209-b3ef-15569e78a89f",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7l5qJ10rgB3rRArR",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        256
+      ],
+      "id": "3d373b3b-9487-41f5-9974-58d9875458af",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Jw6u16TUoSbAW6oL",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-2"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        528
+      ],
+      "id": "2988467b-3335-4eba-8820-06397d1ada41",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Jw6u16TUoSbAW6oL",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        448
+      ],
+      "id": "7b52c262-0bd5-4d39-9884-8b9c6cdfdd46",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Jw6u16TUoSbAW6oL",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        80,
+        256
+      ],
+      "id": "f2f8ee14-7273-40ee-af57-c59fa5cfe8cc",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d0ce7030-93a8-4064-ac96-56d0eba48d73",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dc96f10ae7dc95d3c138575ba243a0a167923dbcb524841d451aadf9135d5fb3"
+  },
+  "nodeGroups": [],
+  "id": "nXOtJUZ9XNEDyzbT",
+  "tags": []
+}
